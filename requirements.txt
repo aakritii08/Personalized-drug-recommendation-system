@@ -1,0 +1,5 @@
+Flask>=2.2
+scikit-learn>=1.2
+pandas>=1.4
+numpy>=1.23
+gunicorn>=20.1    # if deploying with gunicorn

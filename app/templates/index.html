@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-lg text-center py-4">
+  <h2 class="text-info fw-bold mb-4 display-6">💊 Symptom-Based Drug Recommendation</h2>
+
+  <form method="POST" class="mb-5">
+    <div class="input-group input-group-lg shadow">
+      <input name="symptoms" type="text" class="form-control bg-dark text-light border-secondary"
+             placeholder="Enter symptoms (e.g., fever, cough, sore throat)"
+             value="{{ symptoms }}">
+      <button class="btn btn-primary px-5 fw-semibold" type="submit">Get Recommendations</button>
+    </div>
+  </form>
+
+  {% if results %}
+  <div class="text-start">
+    <!-- Diseases Section -->
+    <h3 class="text-warning mb-3 border-bottom border-secondary pb-2">🧬 Possible Diseases</h3>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-4">
+      {% for disease, score in results.diseases %}
+      <div class="col">
+        <div class="card bg-black text-light border border-secondary rounded-3 shadow-sm h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <strong class="fs-5">{{ disease }}</strong>
+            <span class="badge bg-info text-dark fs-6">{{ score }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Medicines Section -->
+    <h3 class="text-primary mt-5 mb-3 border-bottom border-secondary pb-2">💊 Recommended Medicines</h3>
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+      {% for med in results.medicines %}
+      <div class="col">
+        <div class="card bg-dark text-light border border-secondary shadow-lg h-100 rounded-4">
+          {% if med['Image URL'] %}
+          <img src="{{ med['Image URL'] }}" class="card-img-top rounded-top" style="height: 220px; object-fit: cover;">
+          {% endif %}
+          <div class="card-body text-start">
+            <h5 class="card-title text-info fw-bold">{{ med['Medicine Name'] }}</h5>
+            <p><strong>Composition:</strong> {{ med['Composition'] }}</p>
+            <p><strong>Uses:</strong> {{ med['Uses'] }}</p>
+            <p><strong>Side Effects:</strong> {{ med['Side_effects'] }}</p>
+            <p><strong>Manufacturer:</strong> {{ med['Manufacturer'] }}</p>
+
+            <p class="text-success fw-bold mb-1">⭐ {{ med['Average Review %'] }}% Positive Reviews</p>
+
+            {% if med['Avg_Sentiment'] is not none %}
+              <p><strong>Sentiment:</strong>
+                {% if med['Avg_Sentiment'] >= 0.75 %}
+                  <span class="badge bg-success">⭐ Positive ({{ med['Avg_Sentiment'] }})</span>
+                {% elif med['Avg_Sentiment'] >= 0.4 %}
+                  <span class="badge bg-warning text-dark">😐 Neutral ({{ med['Avg_Sentiment'] }})</span>
+                {% else %}
+                  <span class="badge bg-danger">👎 Negative ({{ med['Avg_Sentiment'] }})</span>
+                {% endif %}
+              </p>
+            {% else %}
+              <p><em>No sentiment data available.</em></p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Precautions Section -->
+    <h3 class="text-warning mt-5 mb-3 border-bottom border-secondary pb-2">⚠️ Precautions</h3>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {% for disease, precautions in results.precautions.items() %}
+      <div class="col">
+        <div class="card bg-black text-light border border-secondary p-3 rounded-4 shadow-sm h-100">
+          <h5 class="text-info fw-bold">{{ disease }}</h5>
+          {% if precautions %}
+            <ul class="mb-0">
+              {% for p in precautions %}
+              <li>{{ p }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No specific precautions available.</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
